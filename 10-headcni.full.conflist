@@ -1,0 +1,67 @@
+{
+  "cniVersion": "1.0.0",
+  "name": "cbr0",
+  "type": "headcni",
+  "plugins": [
+    {
+      "type": "headcni",
+      "delegate": {
+        "type": "bridge",
+        "bridge": "cbr0",
+        "isDefaultGateway": true,
+        "isGateway": true,
+        "hairpinMode": true,
+        "forceAddress": false,
+        "ipMasq": false,
+        "promiscMode": true
+      },
+      "dataDir": "/var/lib/cni/headcni",
+      "subnetFile": "/run/headcni/env.yaml"
+    },
+    {
+      "type": "portmap",
+      "capabilities": {
+        "portMappings": true
+      },
+      "snat": true,
+      "conditionsV4": ["!127.0.0.0/8", "!169.254.0.0/16", "!224.0.0.0/4", "!::1/128", "!fe80::/10"],
+      "conditionsV6": ["!127.0.0.0/8", "!169.254.0.0/16", "!224.0.0.0/4", "!::1/128", "!fe80::/10"]
+    },
+    {
+      "type": "bandwidth",
+      "capabilities": {
+        "bandwidth": true
+      }
+    },
+    {
+      "type": "tuning",
+      "capabilities": {
+        "mac": true,
+        "infinibandGUID": true
+      }
+    }
+  ],
+  "runtimeConfig": {
+    "portMappings": [
+      {
+        "hostPort": 8080,
+        "containerPort": 80,
+        "protocol": "tcp"
+      }
+    ],
+    "bandwidth": {
+      "ingressRate": 1000000,
+      "ingressBurst": 1000000,
+      "egressRate": 1000000,
+      "egressBurst": 1000000
+    }
+  },
+  "args": {
+    "cni": {
+      "labels": {
+        "app": "headcni-managed",
+        "version": "v1.0"
+      }
+    }
+  }
+}

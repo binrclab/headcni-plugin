@@ -1,0 +1,48 @@
+# Headcni Environment Configuration
+# This file defines the network environment for the headcni plugin
+
+# IPv4 network configuration
+network: "10.244.0.0/16,172.16.0.0/12"
+subnet: "10.244.1.0/24"
+
+# IPv6 network configuration (optional)
+ipv6_network: "fd00:10:244::/48"
+ipv6_subnet: "fd00:10:244:1::/64"
+
+# MTU for the network interface
+mtu: 1450
+
+# IP masquerading configuration
+# true = enable masquerading, false = disable
+ipmasq: true
+
+# Additional metadata (optional)
+metadata:
+  generated_at: "2024-01-01T00:00:00Z"
+  node_name: "worker-node-1"
+  cluster_cidr: "10.244.0.0/16"
+  service_cidr: "10.96.0.0/12"
+
+# Route configuration (optional)
+routes:
+  - dst: "169.254.169.254/32"
+    gw: "10.244.1.1"
+  - dst: "0.0.0.0/0"
+    gw: "10.244.1.1"
+
+# DNS configuration (optional)
+dns:
+  nameservers:
+    - "10.96.0.10"
+    - "8.8.8.8"
+  domain: "cluster.local"
+  search:
+    - "default.svc.cluster.local"
+    - "svc.cluster.local"
+    - "cluster.local"
+
+# Network policies (optional)
+policies:
+  allow_host_access: true
+  allow_service_access: true
+  egress_allowed: true

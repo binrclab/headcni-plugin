@@ -1,0 +1,26 @@
+{
+  "cniVersion": "1.0.0",
+  "name": "cbr0",
+  "type": "headcni",
+  "plugins": [
+    {
+      "type": "headcni",
+      "delegate": {
+        "hairpinMode": true,
+        "isDefaultGateway": true
+      }
+    },
+    {
+      "type": "portmap",
+      "capabilities": {
+        "portMappings": true
+      }
+    },
+    {
+      "type": "bandwidth",
+      "capabilities": {
+        "bandwidth": true
+      }
+    }
+  ]
+} 

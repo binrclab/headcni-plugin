@@ -64,21 +64,21 @@ if [ "${GOOS}" = "linux" ]; then
     CGO_ENABLED=${CGO_ENABLED} go build \
         -tags "${GO_BUILDTAGS}" \
         ${GO_GCFLAGS} ${GO_BUILD_FLAGS} \
-        -o ${OUTPUT_DIR}/${PROG}-${GOARCH} \
+        -o ${OUTPUT_DIR}/${PROG}-linux-${GOARCH} \
         -ldflags "${GO_LDFLAGS} ${VERSION_FLAGS}" \
         ${GO_TAGS}
 elif [ "${GOOS}" = "windows" ]; then
     CGO_ENABLED=${CGO_ENABLED} go build \
         -tags "${GO_BUILDTAGS}" \
         ${GO_GCFLAGS} ${GO_BUILD_FLAGS} \
-        -o ${OUTPUT_DIR}/${PROG}-${GOARCH}.exe \
+        -o ${OUTPUT_DIR}/${PROG}-windows-${GOARCH}.exe \
         -ldflags "${VERSION_FLAGS} ${GO_LDFLAGS}" \
         ${GO_TAGS}
 elif [ "${GOOS}" = "darwin" ]; then
     CGO_ENABLED=${CGO_ENABLED} go build \
         -tags "${GO_BUILDTAGS}" \
         ${GO_GCFLAGS} ${GO_BUILD_FLAGS} \
-        -o ${OUTPUT_DIR}/${PROG}-${GOARCH} \
+        -o ${OUTPUT_DIR}/${PROG}-darwin-${GOARCH} \
         -ldflags "${GO_LDFLAGS} ${VERSION_FLAGS}" \
         ${GO_TAGS}
 else 
@@ -89,4 +89,10 @@ else
 fi
 
 echo "Successfully built ${PROG} for ${GOOS}/${GOARCH}"
-ls -la ${OUTPUT_DIR}/${PROG}-${GOARCH}* 
+if [ "${GOOS}" = "linux" ]; then
+    ls -la ${OUTPUT_DIR}/${PROG}-linux-${GOARCH}
+elif [ "${GOOS}" = "windows" ]; then
+    ls -la ${OUTPUT_DIR}/${PROG}-windows-${GOARCH}.exe
+elif [ "${GOOS}" = "darwin" ]; then
+    ls -la ${OUTPUT_DIR}/${PROG}-darwin-${GOARCH}
+fi 

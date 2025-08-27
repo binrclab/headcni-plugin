@@ -470,8 +470,8 @@ release: build-all
 # 使用脚本创建发布包
 release-script:
 	@echo -e "$(BLUE)[RELEASE]$(NC) Creating release package using script..."
-	@chmod +x ./scripts/create_release.sh
-	@./scripts/create_release.sh
+	@chmod +x ./scripts/package.sh
+	@./scripts/package.sh
 	@echo -e "$(GREEN)[SUCCESS]$(NC) Release package created using script"
 
 # 显示版本信息

@@ -1,0 +1,65 @@
+# 简化的 HeadCNI Plugin Dockerfile
+# 解决网络超时和架构不匹配问题
+
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+
+# 构建阶段
+FROM golang:1.24-alpine AS builder
+
+# 设置 Go 代理（使用国内镜像）
+ENV GOPROXY=https://goproxy.cn,direct
+ENV GOSUMDB=sum.golang.google.cn
+ENV CGO_ENABLED=0
+
+# 安装构建依赖（添加重试机制）
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps \
+        git \
+        ca-certificates \
+        bash \
+    && rm -rf /var/cache/apk/*
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制 go mod 文件
+COPY go.mod go.sum ./
+
+# 下载依赖
+RUN go mod download
+
+# 复制源代码
+COPY . .
+
+# 构建二进制文件
+RUN GOOS=${TARGETOS} GOARCH=${TARGETARCH} CGO_ENABLED=0 \
+    go build -ldflags "-X main.Version=1.0.0 -X main.Commit=$(git rev-parse --short HEAD 2>/dev/null || echo 'dev')" \
+    -o /app/headcni .
+
+# 运行时阶段
+FROM alpine:3.19
+
+# 添加元数据标签
+LABEL maintainer="binrc <support@binrc.com>"
+LABEL org.opencontainers.image.title="HeadCNI Plugin"
+LABEL org.opencontainers.image.description="CNI Plugin binary for specific platform"
+LABEL org.opencontainers.image.version="1.0.0"
+LABEL org.opencontainers.image.vendor="binrc"
+LABEL org.opencontainers.image.source="https://github.com/binrc/headcni-plugin"
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制二进制文件
+COPY --from=builder /app/headcni /app/
+
+# 设置执行权限
+RUN chmod +x /app/headcni
+
+# 显示构建信息
+RUN echo "Built for platform: ${TARGETOS}-${TARGETARCH}" && \
+    ls -la /app/
+
+# 设置入口点
+ENTRYPOINT ["/app/headcni"] 

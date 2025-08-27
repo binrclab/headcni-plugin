@@ -77,7 +77,6 @@ jobs:
         BUILD_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
         
         cat > release-notes.md << EOF
-        # HeadCNI Plugin ${VERSION}
         
         ## 📦 Release Information
         - **Version**: ${VERSION}

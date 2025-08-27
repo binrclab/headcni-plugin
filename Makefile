@@ -208,9 +208,6 @@ docker-multiarch:
 	@if [ -f "./scripts/build-multiarch-fixed.sh" ]; then \
 		chmod +x ./scripts/build-multiarch-fixed.sh; \
 		./scripts/build-multiarch-fixed.sh all; \
-	elif [ -f "./scripts/build-all-platforms.sh" ]; then \
-		chmod +x ./scripts/build-all-platforms.sh; \
-		./scripts/build-all-platforms.sh all; \
 	else \
 		echo -e "$(RED)[ERROR]$(NC) 多架构构建脚本不存在"; \
 		exit 1; \

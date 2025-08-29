@@ -194,15 +194,25 @@ build_platforms_parallel() {
     
     # 等待所有后台作业完成，显示进度
     log_info "等待所有构建作业完成..."
-    
     # 显示进度
-    local completed=0
     local total=${#PLATFORMS[@]}
     
-    while [ $completed -lt $total ]; do
+    while true; do
         local running=$(jobs -r | wc -l)
         local completed=$((total - running))
+        
+        # 确保进度不会显示负数
+        if [ $completed -lt 0 ]; then
+            completed=0
+        fi
+        
         log_info "构建进度: $completed/$total 完成, $running 运行中..."
+        
+        # 如果所有作业都完成了，退出循环
+        if [ $running -eq 0 ]; then
+            break
+        fi
+        
         sleep 5
     done
     
@@ -421,6 +431,7 @@ main() {
             check_dependencies
             setup_local_builder
             build_platforms_parallel
+            export_images_from_cache
             create_manifest
             verify_images
             cleanup

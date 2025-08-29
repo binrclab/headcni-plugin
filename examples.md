@@ -1,3 +1,34 @@
+# HeadCNI Configuration Examples
+
+## 1. CNI Network Configuration (10-headcni.conf)
+
+```json
+{
+  "name": "cbr0",
+  "cniVersion": "0.3.1",
+  "plugins": [
+    {
+      "type": "headcni",
+      "subnetFile": "/run/headcni/subnet.yaml",
+      "dataDir": "/var/lib/cni/headcni",
+      "delegate": {
+        "hairpinMode": true,
+        "isDefaultGateway": true
+      }
+    },
+    {
+      "type": "portmap",
+      "capabilities": {
+        "portMappings": true
+      }
+    }
+  ]
+}
+```
+
+## 2. Subnet YAML Configuration (subnet.yaml)
+
+```yaml
 # Headcni Environment Configuration
 # This file defines the network environment for the headcni plugin
 
@@ -26,23 +57,31 @@ metadata:                                    # Metadata information
 # Route configuration (optional)
 routes:                                      # Routes configuration
   - dst: 10.43.0.0/16                   # Destination CIDR
-    gw: 10.42.9.1                        # Gateway IP - 修复：使用子网网关
-  - dst: 0.0.0.0/0                      # Destination CIDR
-    gw: 10.42.9.1                        # Gateway IP - 修复：使用子网网关
+    gw: 10.42.9.1                        # Gateway IP
+  - dst: 0.0.0.0/0                      # Default route
+    gw: 10.42.9.1                        # Gateway IP
 
 # DNS configuration (optional)
 dns:                                         # DNS configuration
   nameservers:                             # DNS nameservers
-  - "10.43.0.10"                          # 修复：使用实际的DNS服务IP
-  - "8.8.8.8"
-  - "8.8.4.4"
+  - "10.43.0.10"                          # Primary DNS
+  - "8.8.8.8"                             # Google DNS
+  - "8.8.4.4"                             # Google DNS secondary
   search:                                  # DNS search domains
   - cluster.local
   - svc.cluster.local
-  - cluster.local
   options:                                 # DNS options
   - "ndots:5"
   - "timeout:2"
 
 # Network policies (optional)
-policies: null                               # Network policies
+policies: null
+```
+
+## 3. Minimal Configuration Example
+
+```yaml
+# Minimal headcni subnet configuration
+network: 10.244.0.0/16
+subnet: 10.244.1.0/
+```

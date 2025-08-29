@@ -35,30 +35,26 @@ RUN go mod download
 COPY . .
 
     # 构建目标架构的二进制文件（静态链接，不依赖系统动态库）
-    RUN mkdir -p /app/bin && \
-        set -eux; \
-        case "$TARGETARCH" in \
-            amd64) OS_LIST="linux windows darwin"; ;; \
-            arm64) OS_LIST="linux windows darwin"; ;; \
-            386) OS_LIST="linux"; ;; \
-            arm/v7) OS_LIST="linux"; ;; \
-            arm/v8) OS_LIST="linux"; ;; \
-            ppc64le) OS_LIST="linux"; ;; \
-            s390x) OS_LIST="linux"; ;; \
-            riscv64) OS_LIST="linux"; ;; \
-            *) OS_LIST="linux"; ;; \
-        esac; \
-        for os in $OS_LIST; do \
-            # 统一使用静态链接，避免依赖系统的动态库
-            CGO_ENABLED=0; \
-            echo "Building $os/$TARGETARCH with CGO_ENABLED=$CGO_ENABLED (static linking)"; \
-            GOOS="$os" GOARCH="$TARGETARCH" CGO_ENABLED="$CGO_ENABLED" go build -ldflags "-X main.Version=1.0.0 -X main.Commit=$(git rev-parse --short HEAD 2>/dev/null || echo 'dev') -s -w" -o "/app/bin/headcni-$os-$TARGETARCH" .; \
-            if [ "$os" = "windows" ]; then \
-                cp "/app/bin/headcni-$os-$TARGETARCH" "/app/headcni-$os-$TARGETARCH.exe"; \
-            else \
-                cp "/app/bin/headcni-$os-$TARGETARCH" "/app/headcni-$os-$TARGETARCH"; \
-            fi; \
-        done
+# 修复后的构建命令
+RUN set -eux; \
+    TARGETARCH=${TARGETARCH:-amd64}; \
+    BUILD_DATE=$(date -u '+%Y-%m-%dT%H:%M:%SZ'); \
+    VERSION=${VERSION:-"1.0.0"}; \
+    COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo 'unknown'); \
+    mkdir -p /app/bin; \
+    \
+    case "$TARGETARCH" in \
+        amd64|arm64) OS_LIST="linux windows darwin"; ;; \
+        *) OS_LIST="linux"; ;; \
+    esac; \
+    \
+    for os in $OS_LIST; do \
+        echo "Building $os/$TARGETARCH"; \
+        CGO_ENABLED=0 GOOS="$os" GOARCH="$TARGETARCH" go build \
+            -ldflags "-X main.Version=$VERSION -X main.Commit=$COMMIT -X main.buildDate=$BUILD_DATE -s -w" \
+            -o "/app/bin/headcni-$os-$TARGETARCH$([ "$os" = "windows" ] && echo .exe || echo '')" \
+            .; \
+    done
 
 # Runtime Stage - 使用兼容的基础镜像
 FROM alpine:3.19
@@ -79,7 +75,7 @@ ARG TARGETOS
 ARG TARGETARCH
 
 # Copy the binary from the builder stage
-COPY --from=builder /app/headcni-* /app/
+COPY --from=builder /app/bin/headcni-* /app/
 
 # Verify the binary exists and show what we have
 RUN echo "Available binaries:" && ls -la /app/headcni* && \

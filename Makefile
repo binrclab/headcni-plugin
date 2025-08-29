@@ -72,7 +72,7 @@ endif
 
 # Docker 相关变量
 DOCKER_IMAGE := headcni-plugin
-DOCKER_REGISTRY := binrclab
+DOCKER_REGISTRY := binrc
 DOCKER_NAMESPACE := headcni-plugin
 DOCKER_TAG := $(VERSION)
 

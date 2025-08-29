@@ -1,7 +1,6 @@
 {
   "cniVersion": "1.0.0",
   "name": "cbr0",
-  "type": "headcni",
   "plugins": [
     {
       "type": "headcni",

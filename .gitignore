@@ -1,5 +1,5 @@
 # Binaries for programs and plugins
-headcni*
+headcni
 *.exe
 *.exe~
 *.dll
